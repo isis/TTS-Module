@@ -65,8 +65,11 @@ Ti.API.info("module is => " + tts);
 // step 1 obtain list of TTS Engines installed in Android device 
 var engines = tts.getEngines();
 var pickerdata = [];
-var lastselectedpackagename = engines[0]; 
+var lastselectedpackagename = null; 
 for (var key in engines) {
+	if (lastselectedpackagename == null) {
+		lastselectedpackagename = engines[key];
+	}
 	pickerdata.push(Ti.UI.createPickerRow({title:key, packagename:engines[key]}));
 }
 enginespicker.add(pickerdata);
@@ -100,6 +103,26 @@ tts.addEventListener(tts.TTS_CHKOK, function(e) {
 tts.addEventListener(tts.TTS_INITOK, function(e) {
 	Ti.API.debug("tts engine is initialized");
 	speakbutton.enabled = true;
+	
+	var lang = tts.getLanguage().toString();
+	lang = lang.replace("/_/g", "-").toLowerCase();
+	var rows =  voicespicker.getColumns()[0].rows;
+	var f = -1;
+	for (var i = 0, l = rows.length; i < l; ++i) {
+		var checklang = rows[i]["tilte"];
+		Ti.API.debug("TTS_INITOK columns[0].rows["+i+"].tilte: " + typeof checklang);
+		if ((typeof checklang) === "string") {
+			checklang = checklang.replace("/_/g", "-").toLowerCase();
+			if (checklang == lang) {
+				f = i;
+				break;
+			}
+		}
+	}
+	Ti.API.debug("TTS_INITOK f: " + f);
+	if (0 <= f) {
+		voicespicker.setSelectedRow(0,f);
+	}
 });
 
 // step 5 select language and speak

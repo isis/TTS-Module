@@ -258,7 +258,10 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 	@Kroll.method
 	public boolean isSupportedLang(String localeString)
 	{
-		if (localeString == null) {
+		if (localeString == null || localeString.isEmpty()) {
+			return false;
+		}
+		if (!initialized) {
 			return false;
 		}
 		Locale locale = TiPlatformHelper.getLocale(localeString);
@@ -268,7 +271,10 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 	@Kroll.method
 	public boolean setLanguage(String localeString)
 	{
-		if (localeString == null) {
+		if (localeString == null || localeString.isEmpty()) {
+			return false;
+		}
+		if (!initialized) {
 			return false;
 		}
 		if (isSupportedLang(localeString)) {
@@ -293,6 +299,9 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 	@Kroll.method
 	public String getLanguage()
 	{
+		if (!initialized) {
+			return "";
+		}
 		Locale locale = tts.getLanguage();
 		Log.d(LCAT, "getLanguage:" + locale.toString());
 		return locale.toString();
