@@ -33,7 +33,6 @@ import org.appcelerator.titanium.TiApplication;
 import org.appcelerator.titanium.TiBaseActivity;
 import org.appcelerator.titanium.TiC;
 import org.appcelerator.titanium.util.TiActivityResultHandler;
-import org.appcelerator.titanium.util.TiPlatformHelper;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.kroll.common.TiConfig;
 
@@ -91,7 +90,7 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 	@Kroll.onAppCreate
 	public static void onAppCreate(TiApplication app)
 	{
-		Log.d(LCAT, "inside onAppCreate");
+		if (DBG) Log.d(LCAT, "inside onAppCreate");
 		// put module init code that needs to run when the application is created
 	}
 
@@ -124,14 +123,14 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 	
 	@Override
 	public void onInit(int status) {
-		Log.d(LCAT, "onInit " + status);
+		if (DBG) Log.d(LCAT, "onInit " + status);
 		if(status == TextToSpeech.SUCCESS) {
 			initialized = true;
 			KrollDict data = new KrollDict();
 			data.put(TiC.EVENT_PROPERTY_SOURCE, TtsModule.this);
 			fireEvent(TTS_INITOK, data);
 		}else{
-			Log.e("TTS", "Init error.");
+			if (DBG) Log.e("TTS", "Init error.");
 			KrollDict data = new KrollDict();
 			data.put(TiC.EVENT_PROPERTY_SOURCE, TtsModule.this);
 			fireEvent(TTS_ERROR, data);
@@ -197,7 +196,7 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 			@Kroll.argument(optional = true) String enginepackangename) {
 		shutdown();
 		if (enginepackangename != null) {
-			Log.d(LCAT, "initTTS engine:"+enginepackangename);
+			if (DBG) Log.d(LCAT, "initTTS engine:"+enginepackangename);
 			if (isPackageInstalled(enginepackangename)) {
 				if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.HONEYCOMB_MR2) {
 					tts = new TextToSpeech(TiApplication.getInstance(), this);
@@ -207,7 +206,7 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 				}
 				return true;
 			} else {
-				Log.d(LCAT, "initTTS engine not found");
+				if (DBG) Log.d(LCAT, "initTTS engine not found");
 				return false;
 			}
 		} else {
@@ -250,7 +249,7 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 			if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
 				ArrayList<String> voices= data.getStringArrayListExtra(TextToSpeech.Engine.EXTRA_AVAILABLE_VOICES);
 				if (voices != null) {
-					Log.d(LCAT, "voices:" + voices.toString());
+					if (DBG) Log.d(LCAT, "voices:" + voices.toString());
 				}
 				KrollDict resultdata = new KrollDict();
 				resultdata.put(TiC.EVENT_PROPERTY_SOURCE, TtsModule.this);
@@ -276,7 +275,7 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 		if (!initialized) {
 			return false;
 		}
-		Locale locale = TiPlatformHelper.getLocale(localeString);
+		Locale locale = makeLocaleByString(localeString);
 		return (TextToSpeech.LANG_AVAILABLE <= tts.isLanguageAvailable(locale));			
 	}
 	
@@ -290,13 +289,18 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 			return false;
 		}
 		if (isSupportedLang(localeString)) {
-			Log.d(LCAT, "setLanguage:" + localeString);
-			Locale locale = new Locale(localeString);
+			if (DBG) Log.d(LCAT, "setLanguage:" + localeString);
+			Locale locale = makeLocaleByString(localeString);
+			if (DBG) Log.d(LCAT, "setLanguage getVariant():"+ locale.getVariant());
 			switch (tts.setLanguage(locale)) {
 			case TextToSpeech.LANG_AVAILABLE:
+				if (DBG) Log.d(LCAT, "setLanguage supported LANG_AVAILABLE:" + localeString);
+				return true;
 			case TextToSpeech.LANG_COUNTRY_AVAILABLE:
+				if (DBG) Log.d(LCAT, "setLanguage supported LANG_COUNTRY_AVAILABLE:" + localeString);
+				return true;
 			case TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE:
-				Log.d(LCAT, "setLanguage supported:" + localeString);
+				if (DBG) Log.d(LCAT, "setLanguage supported LANG_COUNTRY_VAR_AVAILABLE:" + localeString);
 				return true;
 			case TextToSpeech.LANG_MISSING_DATA:
 			case TextToSpeech.LANG_NOT_SUPPORTED:
@@ -304,8 +308,26 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 				break;
 			}
 		}
-		Log.d(LCAT, "setLanguage not supported:" + localeString);
+		if (DBG) Log.d(LCAT, "setLanguage not supported:" + localeString);
 		return false;	
+	}
+
+	private Locale makeLocaleByString(String localeString) {
+		Locale locale;
+		String[] elememts = localeString.replaceAll("-", "_").split("_", -1);
+		switch (elememts.length) {
+		case 3:
+			locale = new Locale(elememts[0], elememts[1], elememts[2]);
+			break;
+		case 2:
+			locale = new Locale(elememts[0], elememts[1]);
+			break;
+		case 1:
+		default:
+			locale = new Locale(localeString);
+			break;
+		}
+		return locale;
 	}
 	
 	@Kroll.method
@@ -315,13 +337,13 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 			return "";
 		}
 		Locale locale = tts.getLanguage();
-		Log.d(LCAT, "getLanguage:" + locale.toString());
+		if (DBG) Log.d(LCAT, "getLanguage:" + locale.toString());
 		return locale.toString();
 	}
 		
 	@Kroll.method
 	public boolean isSpeaking() {
-		Log.d(LCAT, "isSpeaking" );
+		if (DBG) Log.d(LCAT, "isSpeaking" );
 		if (initialized) {
 			return tts.isSpeaking();
 		}
@@ -330,14 +352,14 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 	
 	@Kroll.method
 	public boolean speak(String text, @Kroll.argument(optional = true) String utteranceId) {
-		Log.d(LCAT, "speak " + text);
+		if (DBG) Log.d(LCAT, "speak " + text);
 		if (initialized) {
 			if (0 < text.length()) {
 				if (tts.setPitch(getPitch()) == TextToSpeech.ERROR) {
-					Log.e("TTS", "Ptich(" + getPitch() + ") set error.");
+					if (DBG) Log.e("TTS", "Ptich(" + getPitch() + ") set error.");
 				}
 				if (tts.setSpeechRate(getRate()) == TextToSpeech.ERROR) {
-					Log.e("TTS", "Speech rate(" + getRate() + ") set error.");
+					if (DBG) Log.e("TTS", "Speech rate(" + getRate() + ") set error.");
 				}
 				stopSpeaking();
 				tts.setOnUtteranceCompletedListener(this);
@@ -362,7 +384,7 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 
 	@Kroll.method
 	public void stopSpeaking() {
-		Log.d(LCAT, "stopSpeaking ");
+		if (DBG) Log.d(LCAT, "stopSpeaking ");
 		if (initialized) {
 			if (isSpeaking()) {
 				tts.stop();
@@ -428,10 +450,10 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 
 		}
 		try {
-			Log.i(LCAT, "startActivity : TextToSpeechSettings");
+			if (DBG) Log.i(LCAT, "startActivity : TextToSpeechSettings");
 			TiApplication.getInstance().getRootActivity().startActivity(intent);
 		} catch (ActivityNotFoundException e) {
-			Log.e(LCAT, "ActivityNotFoundException");
+			if (DBG) Log.e(LCAT, "ActivityNotFoundException");
 		}
 	}
 }
