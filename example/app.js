@@ -89,6 +89,7 @@ enginespicker.addEventListener('change', function(e) {
 // step 3 reveive TTS_CHKOK event with voice list and send message to create instance of TTS Engine
 tts.addEventListener(tts.TTS_CHKOK, function(e) {
 	Ti.API.debug(tts.TTS_CHKOK + "voices :" + e.voices);
+	clearPicker(voicespicker);
 	var pickerdata = [];
 	for (var i = 0, l = e.voices.length; i < l; ++i) {
 		pickerdata.push(Ti.UI.createPickerRow({title:e.voices[i], packagename:lastselectedpackagename}));
@@ -105,21 +106,17 @@ tts.addEventListener(tts.TTS_INITOK, function(e) {
 	speakbutton.enabled = true;
 	
 	var lang = tts.getLanguage().toString();
-	lang = lang.replace("/_/g", "-").toLowerCase();
-	var rows =  voicespicker.getColumns()[0].rows;
+	lang = lang.replace(/_/g, "-").toLowerCase();
+	var rows = voicespicker.getColumns()[0].rows;
 	var f = -1;
 	for (var i = 0, l = rows.length; i < l; ++i) {
-		var checklang = rows[i]["tilte"];
-		Ti.API.debug("TTS_INITOK columns[0].rows["+i+"].tilte: " + typeof checklang);
-		if ((typeof checklang) === "string") {
-			checklang = checklang.replace("/_/g", "-").toLowerCase();
-			if (checklang == lang) {
-				f = i;
-				break;
-			}
+		var checklang = rows[i]["title"];
+		checklang = checklang.replace(/_/g, "-").toLowerCase();
+		if (checklang == lang) {
+			f = i;
+			break;
 		}
 	}
-	Ti.API.debug("TTS_INITOK f: " + f);
 	if (0 <= f) {
 		voicespicker.setSelectedRow(0,f);
 	}
@@ -129,8 +126,9 @@ tts.addEventListener(tts.TTS_INITOK, function(e) {
 voicespicker.addEventListener('change', function(e) {
 	Ti.API.debug("voicespicker change /tts.isInitialized:" + tts.isInitialized);
 	if (tts.isInitialized) {
-		Ti.API.debug("voicespicker change:" + e.row.title);
-		tts.setLanguage(e.row.title);
+		var newlang = e.row.title;//.replace(/\-/g, "_").toLowerCase();
+		Ti.API.debug("voicespicker change:" + newlang);
+		tts.setLanguage(newlang);
 	}else{
 		
 	}
