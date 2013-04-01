@@ -25,11 +25,11 @@ gets list of TTS engines that are intalled in Android device.
 
 ##### Parameters
 
-+void
++ void
 
 ##### Returns
 
-+Dict<String, String>
++ Dict<String, String>
 
 
 #### TTSMODULE.initTTS(String enginepackangename) : Boolean
@@ -39,7 +39,7 @@ You should check in *initok* or *error* event whether the specified TTS engine i
 
 ##### Parameters
 
-+enginepackangename : String
++ enginepackangename : String
 
 (optional) the package name of TTS engine to use.
 
@@ -48,7 +48,7 @@ use TTS engine set by the device setting.
 
 ##### Returns
 
-+Boolean
++ Boolean
 
 true if the package of TTS engine specified by enginepackangename is found, even though TTS engine is not actually available.
 
@@ -60,7 +60,7 @@ requires  the supported languages information of TTS engine specified by *engine
 
 ##### Parameters
 
-+enginepackangename : String
++ enginepackangename : String
 
 (optional) the package name of TTS engine to use.
 
@@ -71,43 +71,43 @@ checkTTS result (in *checkok* event) is the information of user's selected TTS e
 
 ##### Returns
 
-+void
++ void
 
 #### TTSMODULE.isSupportedLang(String localeString) : Boolean
 check whether the specified language is supported by the current TTS engine.
 
 ##### Parameters
 
-+localeString : String
++ localeString : String
 
 locale string to check for.
 
 ##### Returns
 
-+Boolean
++ Boolean
 
 #### TTSMODULE.setLanguage(String localeString) : Boolean
 set language for TTS engine to use.
 
 ##### Parameters
 
-+localeString : String
++ localeString : String
 locale string is one of languages ("en-usa" etc.) that *checkok* event provided.
 
 ##### Returns
 
-+Boolean
++ Boolean
 
 #### TTSMODULE.getLanguage() : String
 get current language that TTS engine uses.
 
 ##### Parameters
 
-+void : 
++ void : 
 
 ##### Returns
 
-+String
++ String
 
 locale string to use, like "en-usa".
 
@@ -116,11 +116,11 @@ get whether TTS engine is speeking.
 
 ##### Parameters
 
-+void : 
++ void : 
 
 ##### Returns
 
-+Boolean
++ Boolean
 
 true if TTS engine is speaking.
 
@@ -129,38 +129,38 @@ get whether TTS engine is speeking.
 
 ##### Parameters
 
-+text : String
++ text : String
 text to speak.
 
-+utteranceId : String
++ utteranceId : String
 
 (optional) make TTS engine to fire *utterancecomplete* event when speech is finished.
 
 ##### Returns
 
-+Boolean
++ Boolean
 
 #### TTSMODULE.shutdown() : void
 make TTS engine instance free.
 
 ##### Parameters
 
-+void 
++ void 
 
 ### Returns
 
-+void
++ void
 
 #### TTSMODULE.showTTSSettings() : void
 open TTS Setting of device.
 
 ##### Parameters
 
-+void 
++ void 
 
 ### Returns
 
-+void
++ void
 
 
 
