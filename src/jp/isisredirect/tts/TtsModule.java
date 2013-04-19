@@ -81,7 +81,7 @@ public class TtsModule extends KrollModule implements OnInitListener, OnUtteranc
 	private float pitch = 1.0f;
 	private float rate = 1.0f;
 	
-	private static final int CHECK_TTS = 682730934;
+	private static final int CHECK_TTS = 60007;
 	
 	public TtsModule() {
 		super();
